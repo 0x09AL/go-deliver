@@ -24,6 +24,13 @@ type Payload struct {
 
 }
 
+type Host struct {
+	name string
+	htype string
+	data string
+}
+
+
 var MainCompleter = readline.NewPrefixCompleter(
 	readline.PcItem("payload",
 		readline.PcItem("add",
@@ -59,7 +66,21 @@ var PayloadCompleter = readline.NewPrefixCompleter(
 		//readline.PcItem("listener"), // This is to be implemented later.
 	),
 	readline.PcItem("options"),
+	readline.PcItem("back"),
 )
+
+
+var HostCompleter = readline.NewPrefixCompleter(
+	readline.PcItem("set",
+		readline.PcItem("name"),
+		readline.PcItem("type",
+			readline.PcItem("ip"),
+			readline.PcItem("subnet"),
+		),
+		readline.PcItem("data"),
+		),
+)
+
 
 func handlePayloadCreation(ptype string, l *readline.Instance)  {
 	payload := Payload{}
@@ -67,6 +88,7 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 	fmt.Println(fmt.Sprintf("Will create a payload named with the ptype %s",payload.ptype))
 	l.Config.AutoComplete = PayloadCompleter
 	l.SetPrompt(fmt.Sprintf(prompt,"payload-options"))
+
 	for {
 		line, err := l.Readline()
 		if err == readline.ErrInterrupt {
@@ -80,11 +102,16 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 		}
 
 		line = strings.TrimSpace(line)
-		if line == "exit"{
+		switch line{
+		case "back":
 			backMain(l)
-			break
-		}else{
-			fmt.Println(line)
+			return
+		case "options":
+			// To be fixed
+			fmt.Printf("OPTIONS \n%+v", payload)
+		default:
+
+
 		}
 	}
 }
@@ -94,6 +121,7 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 func backMain(l *readline.Instance){
 	context = "main"
 	l.SetPrompt(fmt.Sprintf(prompt,"main"))
+	l.Config.AutoComplete = MainCompleter
 }
 
 func handleInput(line string ,l *readline.Instance)  {
