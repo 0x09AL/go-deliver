@@ -20,7 +20,8 @@ type Payload struct {
 	data_file	string
 	data_b64	string
 	ptype 		string
-	one_liner	string
+	type_id		int
+	//one_liner	string
 
 }
 
@@ -54,7 +55,7 @@ var PayloadCompleter = readline.NewPrefixCompleter(
 		readline.PcItem("data_file"),
 		readline.PcItem("data_b64"),
 		readline.PcItem("type"),
-		//readline.PcItem("listener"), // This is to be implemented later.
+		//readline.PcItem("listener"), // This is will be implemented later.
 		),
 	readline.PcItem("unset",
 		readline.PcItem("content_type"),
@@ -63,7 +64,7 @@ var PayloadCompleter = readline.NewPrefixCompleter(
 		readline.PcItem("data_file"),
 		readline.PcItem("data_b64"),
 		readline.PcItem("type"),
-		//readline.PcItem("listener"), // This is to be implemented later.
+		//readline.PcItem("listener"), // This is will be implemented later.
 	),
 	readline.PcItem("options"),
 	readline.PcItem("back"),
@@ -109,6 +110,10 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 		case "options":
 			// To be fixed
 			fmt.Printf("OPTIONS \n%+v", payload)
+		case "set":
+			fmt.Println("This will set the options.")
+		case "unset":
+			fmt.Println("Unset the payload.")
 		default:
 
 

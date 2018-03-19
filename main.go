@@ -13,12 +13,15 @@ import (
 func main() {
 
 
-	// Start the http listener.
+	// Setup Routes
 	listener := mux.NewRouter()
 	listener.HandleFunc("/",database.ShowShit).Methods("GET")
+	listener.HandleFunc("/{puid}",database.GetPayload).Methods("GET")
 	listener.HandleFunc("/payloads/edit/{pid}",database.EditPayload).Methods("GET")
 	listener.HandleFunc("/payloads/new",database.CreatePayloadGet).Methods("GET")
 	listener.HandleFunc("/payloads/create",database.CreatePayload).Methods("POST")
+
+	// Starts the server
 	log.Println("Starting server .")
 	go http.ListenAndServe(":8000",listener)
 

@@ -36,6 +36,12 @@ type Host struct {
 
 func CreateTable()  {
 
+	// Insert payload query
+	//insert into payloads values (NULL,'test123','wtf',NULL,NULL,'/tmp/shit',NULL,1);
+	// Payload types query
+	//insert into payload_types values (NULL,'javascript',NULL)
+
+
 
 	// This function will create the requrired shits
 	createTableSql := `CREATE TABLE payloads (
@@ -46,7 +52,7 @@ func CreateTable()  {
 							host_whitelist	TEXT,
 							data_file	TEXT,
 							data_b64	TEXT,
-							type	INTEGER NOT NULL
+							type_id	INTEGER NOT NULL
 						);
 						`
 
