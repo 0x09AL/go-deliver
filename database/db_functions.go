@@ -12,37 +12,61 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func FuckOFF()  {
-	createTableSql := `CREATE TABLE payloads (
-p_id	INTEGER PRIMARY KEY AUTOINCREMENT,
-p_name	TEXT UNIQUE,
-p_ct	TEXT NOT NULL,
-p_content	TEXT NOT NULL
-);
-`
-	fmt.Println(createTableSql)
-}
 
-type Payload struct{
-	P_id int
-	P_name	string
-	P_ct	string
-	P_content	string
-}
 
 var db, _ = sql.Open("sqlite3", "db_file.db")
+type Payload struct {
+	id int
+	name string
+	content_type string
+	host_blacklist	string
+	host_whitelist	string
+	data_file	string
+	data_b64	string
+	ptype 		string
+	one_liner	string
 
+}
+
+type Host struct {
+	name string
+	htype string
+	data string
+}
 
 func CreateTable()  {
+
+
+	// This function will create the requrired shits
 	createTableSql := `CREATE TABLE payloads (
-						p_id	INTEGER PRIMARY KEY AUTOINCREMENT,
-						p_name	TEXT UNIQUE,
-						p_ct	TEXT NOT NULL,
-						p_content	TEXT NOT NULL
+							id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+							name	TEXT NOT NULL UNIQUE,
+							content_type	TEXT,
+							host_blacklist	TEXT,
+							host_whitelist	TEXT,
+							data_file	TEXT,
+							data_b64	TEXT,
+							type	INTEGER NOT NULL
 						);
 						`
-						// This function will create the table if it doesn't exists.
+
+	createHostSql := `CREATE TABLE hosts (
+							id	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+							type	TEXT NOT NULL,
+							data	TEXT NOT NULL
+						);`
+
+	createTypesSql := `CREATE TABLE types (
+							id	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+							name	TEXT NOT NULL UNIQUE,
+							type_template	TEXT
+						);`
+
+
+
 	fmt.Println(createTableSql)
+	fmt.Println(createHostSql)
+	fmt.Println(createTypesSql)
 }
 
 
@@ -56,7 +80,7 @@ func EditPayload(w http.ResponseWriter,r *http.Request)  {
 	}
 	payload := Payload{}
 	rows.Next()
-	err_sql := rows.Scan(&payload.P_id,&payload.P_name,&payload.P_ct,&payload.P_content)
+	err_sql := rows.Scan(&payload.id,&payload.name,&payload.content_type,&payload.data_b64)
 
 	if err_sql != nil{
 		panic(err_sql)
