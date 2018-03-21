@@ -1,0 +1,11 @@
+This is a list of things to do.
+
+(x) Make payload delivery function.
+( ) Make payload creation function.
+( ) Make payload list/delete function.
+( ) Get payload types from db and make the suggestions based on that.
+( ) Get host from db and make suggestions on the payload options.
+( ) Make the host add/delete function.
+
+Other versions
+( ) Add different listeners like smb,https etc.
