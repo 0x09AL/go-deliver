@@ -10,11 +10,15 @@ import (
 	"log"
 	"html/template"
 	"github.com/gorilla/mux"
+	"net"
+	"encoding/base64"
+
+	"io/ioutil"
 )
 
 
 
-var db, _ = sql.Open("sqlite3", "db_file.db")
+var db, _ = sql.Open("sqlite3", "test_db.db")
 type Payload struct {
 	id int
 	name string
@@ -23,8 +27,8 @@ type Payload struct {
 	host_whitelist	string
 	data_file	string
 	data_b64	string
-	ptype 		string
-	one_liner	string
+	type_id 		int
+	//one_liner	string
 
 }
 
@@ -106,8 +110,62 @@ func ShowShit(w http.ResponseWriter,r *http.Request)  {
 }
 func GetPayloads(w http.ResponseWriter,r *http.Request)  {
 
+
 }
 func GetPayload(w http.ResponseWriter,r *http.Request){
+	vars := mux.Vars(r)
+	puid := vars["puid"]
+	GetPayloadQuery := `SELECT id,
+						name,
+						content_type,
+						COALESCE(host_blacklist, '') as host_blacklist, 
+						COALESCE(host_whitelist, '') as host_whitelist,
+						COALESCE(data_file, '') as data_file, 
+						COALESCE(data_b64, '') as data_b64 ,
+						type_id 
+						from payloads 
+						WHERE id=?`
+
+
+	rows, err := db.Query(GetPayloadQuery, puid)
+	if err != nil {
+		panic(err)
+	}
+	payload := Payload{}
+	rows.Next()
+	err_sql := rows.Scan(&payload.id,&payload.name,&payload.content_type,&payload.host_blacklist,&payload.host_whitelist,&payload.data_file,&payload.data_b64,&payload.type_id)
+
+	if err_sql != nil{
+		panic(err_sql)
+	}
+
+	ip , _ , _ := net.SplitHostPort(r.RemoteAddr)
+
+	log.Println(fmt.Sprintf("Delivering payload %s to IP : %s",payload.name,ip))
+
+	w.Header().Set("Content-Type",payload.content_type)
+	w.WriteHeader(http.StatusOK)
+
+	if payload.data_file == ""{
+		if payload.data_b64 != ""{
+			data, err := base64.StdEncoding.DecodeString(payload.data_b64)
+			if err != nil{
+				log.Println("ERROR : Decoding b64 payload failed.")
+			}
+			w.Write([]byte(data))
+		}else{
+			log.Println("ERROR : Payload delivery failed. No content or file specified.")
+		}
+	}else{
+		// Write data from file
+		data, err := ioutil.ReadFile(payload.data_file)
+		if err != nil{
+			log.Println(fmt.Sprintf("ERROR: Payload file %s not found.", payload.data_file))
+			return
+		}
+		w.Write(data)
+	}
+
 
 }
 
