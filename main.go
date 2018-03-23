@@ -16,7 +16,7 @@ func main() {
 	// Setup Routes
 	listener := mux.NewRouter()
 	listener.HandleFunc("/",database.ShowShit).Methods("GET")
-	listener.HandleFunc("/{puid}/",database.GetPayload).Methods("GET")
+	listener.HandleFunc("/{guid}/",database.GetPayload).Methods("GET")
 	listener.HandleFunc("/payloads/edit/{pid}",database.EditPayload).Methods("GET")
 	listener.HandleFunc("/payloads/new",database.CreatePayloadGet).Methods("GET")
 	listener.HandleFunc("/payloads/create",database.CreatePayload).Methods("POST")

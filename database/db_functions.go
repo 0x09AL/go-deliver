@@ -14,13 +14,21 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"go-deliver/model"
+
+	"math/rand"
+	"time"
 )
 
 
 
 var db, _ = sql.Open("sqlite3", "test_db.db")
+var letters = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 
+func randomInit() {
+	// There is no reason to use a strong number generator since the payloads already have whitelist/blacklists.
+	rand.Seed(time.Now().UnixNano())
+}
 
 
 
@@ -42,7 +50,8 @@ func CreateTable()  {
 							host_whitelist	TEXT,
 							data_file	TEXT,
 							data_b64	TEXT,
-							type_id	INTEGER NOT NULL
+							type_id	INTEGER NOT NULL,
+							guid	TEXT NOT NULL UNIQUE
 						);
 						`
 
@@ -92,20 +101,38 @@ func DeletePayload(w http.ResponseWriter,r *http.Request)  {
 
 }
 
+
+func RandStringRunes(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+func GetTypeid(ptype string) int{
+	// To be Implemented
+	return 1;
+}
+
+
 func InsertPayload(payload model.Payload){
-	query := "INSERT INTO payloads VALUES (NULL,?,?,?,?,?,?,1);"
+	randomInit()
+	query := "INSERT INTO payloads VALUES (NULL,?,?,?,?,?,?,?,?);"
 	tx, _ := db.Begin()
 	stmt, err_stmt := tx.Prepare(query)
+	payload.Guid = RandStringRunes(32)
 
 	if err_stmt != nil {
 		log.Fatal(err_stmt)
 	}
-	_, err := stmt.Exec(payload.Name,payload.Content_type,payload.Host_blacklist,payload.Host_whitelist,payload.Data_file,payload.Data_b64)
+	_, err := stmt.Exec(payload.Name,payload.Content_type,payload.Host_blacklist,payload.Host_whitelist,payload.Data_file,payload.Data_b64,payload.Type_id,payload.Guid)
 	tx.Commit()
 	if err != nil{
+
 		log.Println("ERROR: Error inserting payload.")
 	}else{
-		log.Println("Payload created with URL bla bla.") // Fix the URL output
+
+		log.Println(fmt.Sprintf("Payload with name %s created successfully.",payload.Name)) // Fix the URL output
 	}
 
 }
@@ -121,7 +148,7 @@ func GetPayloads(w http.ResponseWriter,r *http.Request)  {
 }
 func GetPayload(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
-	puid := vars["puid"]
+	guid := vars["guid"]
 	GetPayloadQuery := `SELECT id,
 						name,
 						content_type,
@@ -131,10 +158,10 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 						COALESCE(data_b64, '') as data_b64 ,
 						type_id 
 						from payloads 
-						WHERE id=?`
+						WHERE guid=?`
 
 
-	rows, err := db.Query(GetPayloadQuery, puid)
+	rows, err := db.Query(GetPayloadQuery, guid)
 	if err != nil {
 		panic(err)
 	}

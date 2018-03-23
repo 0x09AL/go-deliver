@@ -8,6 +8,8 @@ import(
 	"io"
 	"go-deliver/model"
 	"go-deliver/database"
+	"encoding/json"
+	"log"
 )
 
 var context string = "main"
@@ -72,11 +74,15 @@ var HostCompleter = readline.NewPrefixCompleter(
 
 
 
+
+
 func handlePayloadCreation(ptype string, l *readline.Instance)  {
+
 	payload := model.Payload{}
 	payload.Ptype = ptype
+	payload.Type_id = database.GetTypeid(ptype)
 
-	//fmt.Println(fmt.Sprintf("Will create a payload named with the ptype %s",payload.ptype))
+
 	l.Config.AutoComplete = PayloadCompleter
 	l.SetPrompt(fmt.Sprintf(prompt,"payload-options"))
 
@@ -102,7 +108,13 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 			return
 		case "options":
 			// To be fixed
-			fmt.Println(payload)
+
+			data, err := json.MarshalIndent(payload,"", "  ")
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("%s\n", data)
+
 		case "set":
 			if len(temp) == 3{
 				key := temp[1]
@@ -122,15 +134,30 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 					payload.Data_b64 = value
 				case "ptype":
 					payload.Ptype = value
-				case "type_id":
-					payload.Type_id, _ = fmt.Sscanf("%d",value)
 				}
 
 			}
 		case "unset":
-			fmt.Println("Unset the payload.")
+			if len(temp) == 2{
+				key := temp[1]
+				switch key{
+				case "name":
+					payload.Name = ""
+				case "content_type":
+					payload.Content_type = ""
+				case "host_whitelist":
+					payload.Host_whitelist = ""
+				case "host_blacklist":
+					payload.Host_blacklist = ""
+				case "data_file":
+					payload.Data_file = ""
+				case "data_b64":
+					payload.Data_b64 = ""
+				case "ptype":
+					payload.Ptype = ""
+				}
+			}
 		case "create":
-
 			database.InsertPayload(payload)
 		default:
 

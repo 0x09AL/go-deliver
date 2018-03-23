@@ -11,6 +11,7 @@ type Payload struct {
 	Data_b64	string
 	Ptype 		string
 	Type_id		int
+	Guid		string
 	//one_liner	string
 
 }
