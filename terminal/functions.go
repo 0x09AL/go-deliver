@@ -6,34 +6,13 @@ import(
 	"github.com/chzyer/readline"
 	"strings"
 	"io"
-	"reflect"
+	"go-deliver/model"
+	"go-deliver/database"
 )
 
 var context string = "main"
 var prompt string = "go-deliver (\033[0;32m%s\033[0;0m)\033[31m >> \033[0;0m"
 
-
-
-
-type Payload struct {
-	id int
-	name string
-	content_type string
-	host_blacklist	string
-	host_whitelist	string
-	data_file	string
-	data_b64	string
-	ptype 		string
-	type_id		int
-	//one_liner	string
-
-}
-
-type Host struct {
-	name string
-	htype string
-	data string
-}
 
 
 var MainCompleter = readline.NewPrefixCompleter(
@@ -47,6 +26,7 @@ var MainCompleter = readline.NewPrefixCompleter(
 		),
 		readline.PcItem("delete"),
 		readline.PcItem("list"),
+
 	),
 	readline.PcItem("host"),
 	//	readline.PcItem("listeners") To be implemented later .
@@ -54,6 +34,7 @@ var MainCompleter = readline.NewPrefixCompleter(
 
 var PayloadCompleter = readline.NewPrefixCompleter(
 	readline.PcItem("set",
+		readline.PcItem("name"),
 		readline.PcItem("content_type"),
 		readline.PcItem("host_blacklist"),
 		readline.PcItem("host_whitelist"),
@@ -72,7 +53,9 @@ var PayloadCompleter = readline.NewPrefixCompleter(
 		//readline.PcItem("listener"), // This is will be implemented later.
 	),
 	readline.PcItem("options"),
+	readline.PcItem("create"),
 	readline.PcItem("back"),
+
 )
 
 
@@ -87,24 +70,16 @@ var HostCompleter = readline.NewPrefixCompleter(
 		),
 )
 
-func SetField(source interface{}, fieldName string, fieldValue string) {
-	v := reflect.ValueOf(source).Elem()
 
-	fmt.Println(v.FieldByName(fieldName).CanSet())
-
-	if v.FieldByName(fieldName).CanSet() {
-		v.FieldByName(fieldName).SetString(fieldValue)
-	}
-}
 
 func handlePayloadCreation(ptype string, l *readline.Instance)  {
-	payload := Payload{}
-	payload.ptype = ptype
-	fmt.Println(fmt.Sprintf("Will create a payload named with the ptype %s",payload.ptype))
+	payload := model.Payload{}
+	payload.Ptype = ptype
+
+	//fmt.Println(fmt.Sprintf("Will create a payload named with the ptype %s",payload.ptype))
 	l.Config.AutoComplete = PayloadCompleter
 	l.SetPrompt(fmt.Sprintf(prompt,"payload-options"))
-	// Creates a temporary map to copy data to the struct later. Used this instead of going with reflection.
-	m := make(map[string]string)
+
 	for {
 		line, err := l.Readline()
 		if err == readline.ErrInterrupt {
@@ -118,27 +93,45 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 		}
 
 		line = strings.TrimSpace(line)
-		command := strings.Split(line," ")[0]
 
+		temp := strings.Split(line," ")
+		command := temp[0]
 		switch command{
 		case "back":
 			backMain(l)
 			return
 		case "options":
 			// To be fixed
-			fmt.Println(m)
+			fmt.Println(payload)
 		case "set":
-
-			temp := strings.Split(line," ")
 			if len(temp) == 3{
 				key := temp[1]
 				value := temp[2]
-				m[key] = value
-			}
+				switch key{
+				case "name":
+					payload.Name = value
+				case "content_type":
+					payload.Content_type = value
+				case "host_whitelist":
+					payload.Host_whitelist = value
+				case "host_blacklist":
+					payload.Host_blacklist = value
+				case "data_file":
+					payload.Data_file = value
+				case "data_b64":
+					payload.Data_b64 = value
+				case "ptype":
+					payload.Ptype = value
+				case "type_id":
+					payload.Type_id, _ = fmt.Sscanf("%d",value)
+				}
 
-			fmt.Println( len(strings.Split(line," ")))
+			}
 		case "unset":
 			fmt.Println("Unset the payload.")
+		case "create":
+
+			database.InsertPayload(payload)
 		default:
 
 

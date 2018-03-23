@@ -12,31 +12,17 @@ import (
 	"github.com/gorilla/mux"
 	"net"
 	"encoding/base64"
-
 	"io/ioutil"
+	"go-deliver/model"
 )
 
 
 
 var db, _ = sql.Open("sqlite3", "test_db.db")
-type Payload struct {
-	id int
-	name string
-	content_type string
-	host_blacklist	string
-	host_whitelist	string
-	data_file	string
-	data_b64	string
-	type_id 		int
-	//one_liner	string
 
-}
 
-type Host struct {
-	name string
-	htype string
-	data string
-}
+
+
 
 func CreateTable()  {
 
@@ -88,9 +74,10 @@ func EditPayload(w http.ResponseWriter,r *http.Request)  {
 	if err != nil {
 		panic(err)
 	}
-	payload := Payload{}
+	payload := model.Payload{}
 	rows.Next()
-	err_sql := rows.Scan(&payload.id,&payload.name,&payload.content_type,&payload.data_b64)
+
+	err_sql := rows.Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Data_b64)
 
 	if err_sql != nil{
 		panic(err_sql)
@@ -104,6 +91,26 @@ func EditPayload(w http.ResponseWriter,r *http.Request)  {
 func DeletePayload(w http.ResponseWriter,r *http.Request)  {
 
 }
+
+func InsertPayload(payload model.Payload){
+	query := "INSERT INTO payloads VALUES (NULL,?,?,?,?,?,?,1);"
+	tx, _ := db.Begin()
+	stmt, err_stmt := tx.Prepare(query)
+
+	if err_stmt != nil {
+		log.Fatal(err_stmt)
+	}
+	_, err := stmt.Exec(payload.Name,payload.Content_type,payload.Host_blacklist,payload.Host_whitelist,payload.Data_file,payload.Data_b64)
+	tx.Commit()
+	if err != nil{
+		log.Println("ERROR: Error inserting payload.")
+	}else{
+		log.Println("Payload created with URL bla bla.") // Fix the URL output
+	}
+
+}
+
+
 func ShowShit(w http.ResponseWriter,r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w,"What you received is shit")
@@ -131,9 +138,9 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 	if err != nil {
 		panic(err)
 	}
-	payload := Payload{}
+	payload := model.Payload{}
 	rows.Next()
-	err_sql := rows.Scan(&payload.id,&payload.name,&payload.content_type,&payload.host_blacklist,&payload.host_whitelist,&payload.data_file,&payload.data_b64,&payload.type_id)
+	err_sql := rows.Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id)
 
 	if err_sql != nil{
 		panic(err_sql)
@@ -141,14 +148,14 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 
 	ip , _ , _ := net.SplitHostPort(r.RemoteAddr)
 
-	log.Println(fmt.Sprintf("Delivering payload %s to IP : %s",payload.name,ip))
+	log.Println(fmt.Sprintf("Delivering payload %s to IP : %s",payload.Name,ip))
 
-	w.Header().Set("Content-Type",payload.content_type)
+	w.Header().Set("Content-Type",payload.Content_type)
 	w.WriteHeader(http.StatusOK)
 
-	if payload.data_file == ""{
-		if payload.data_b64 != ""{
-			data, err := base64.StdEncoding.DecodeString(payload.data_b64)
+	if payload.Data_file == ""{
+		if payload.Data_b64 != ""{
+			data, err := base64.StdEncoding.DecodeString(payload.Data_b64)
 			if err != nil{
 				log.Println("ERROR : Decoding b64 payload failed.")
 			}
@@ -158,9 +165,9 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 		}
 	}else{
 		// Write data from file
-		data, err := ioutil.ReadFile(payload.data_file)
+		data, err := ioutil.ReadFile(payload.Data_file)
 		if err != nil{
-			log.Println(fmt.Sprintf("ERROR: Payload file %s not found.", payload.data_file))
+			log.Println(fmt.Sprintf("ERROR: Payload file %s not found.", payload.Data_file))
 			return
 		}
 		w.Write(data)
@@ -178,6 +185,8 @@ func CreatePayloadGet(w http.ResponseWriter,r *http.Request)  {
 	}
 	t.Execute(w,nil)
 }
+
+
 
 func CreatePayload(w http.ResponseWriter,r *http.Request)  {
 
