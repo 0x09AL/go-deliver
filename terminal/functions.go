@@ -6,10 +6,14 @@ import(
 	"github.com/chzyer/readline"
 	"strings"
 	"io"
+	"reflect"
 )
 
 var context string = "main"
 var prompt string = "go-deliver (\033[0;32m%s\033[0;0m)\033[31m >> \033[0;0m"
+
+
+
 
 type Payload struct {
 	id int
@@ -35,6 +39,7 @@ type Host struct {
 var MainCompleter = readline.NewPrefixCompleter(
 	readline.PcItem("payload",
 		readline.PcItem("add",
+			// Vlerat ketu do merren nga databaza ne te ardhmen.
 			readline.PcItem("mshta"),
 			readline.PcItem("regsrv32"),
 			readline.PcItem("powershell"),
@@ -54,7 +59,7 @@ var PayloadCompleter = readline.NewPrefixCompleter(
 		readline.PcItem("host_whitelist"),
 		readline.PcItem("data_file"),
 		readline.PcItem("data_b64"),
-		readline.PcItem("type"),
+		readline.PcItem("ptype"),
 		//readline.PcItem("listener"), // This is will be implemented later.
 		),
 	readline.PcItem("unset",
@@ -82,6 +87,15 @@ var HostCompleter = readline.NewPrefixCompleter(
 		),
 )
 
+func SetField(source interface{}, fieldName string, fieldValue string) {
+	v := reflect.ValueOf(source).Elem()
+
+	fmt.Println(v.FieldByName(fieldName).CanSet())
+
+	if v.FieldByName(fieldName).CanSet() {
+		v.FieldByName(fieldName).SetString(fieldValue)
+	}
+}
 
 func handlePayloadCreation(ptype string, l *readline.Instance)  {
 	payload := Payload{}
@@ -89,7 +103,8 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 	fmt.Println(fmt.Sprintf("Will create a payload named with the ptype %s",payload.ptype))
 	l.Config.AutoComplete = PayloadCompleter
 	l.SetPrompt(fmt.Sprintf(prompt,"payload-options"))
-
+	// Creates a temporary map to copy data to the struct later. Used this instead of going with reflection.
+	m := make(map[string]string)
 	for {
 		line, err := l.Readline()
 		if err == readline.ErrInterrupt {
@@ -103,15 +118,25 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 		}
 
 		line = strings.TrimSpace(line)
-		switch line{
+		command := strings.Split(line," ")[0]
+
+		switch command{
 		case "back":
 			backMain(l)
 			return
 		case "options":
 			// To be fixed
-			fmt.Printf("OPTIONS \n%+v", payload)
+			fmt.Println(m)
 		case "set":
-			fmt.Println("This will set the options.")
+
+			temp := strings.Split(line," ")
+			if len(temp) == 3{
+				key := temp[1]
+				value := temp[2]
+				m[key] = value
+			}
+
+			fmt.Println( len(strings.Split(line," ")))
 		case "unset":
 			fmt.Println("Unset the payload.")
 		default:
