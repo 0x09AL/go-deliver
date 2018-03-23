@@ -108,7 +108,6 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 			return
 		case "options":
 			// To be fixed
-
 			data, err := json.MarshalIndent(payload,"", "  ")
 			if err != nil {
 				log.Fatal(err)

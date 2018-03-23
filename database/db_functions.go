@@ -231,7 +231,10 @@ func CreatePayload(w http.ResponseWriter,r *http.Request)  {
 		http.Redirect(w,r,"/create.html",http.StatusSeeOther)
 		log.Println("Payload created.")
 
-
 	}
 
+}
+
+func ListPayloads(){
+	//
 }
