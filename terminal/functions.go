@@ -10,6 +10,7 @@ import(
 	"go-deliver/database"
 	"encoding/json"
 	"log"
+
 )
 
 var context string = "main"
@@ -175,24 +176,30 @@ func backMain(l *readline.Instance){
 
 func handleInput(line string ,l *readline.Instance)  {
 
-
+	var ptype string
+	var command string
 	line = strings.TrimSpace(line)
 	temp := strings.Split(line," ")
+	if len(temp) >1 {
+		command = temp[1]
+	}
 
-	if len(temp) > 2 {
-
-		command := temp[1]
-		switch {
+	switch {
 
 		// Handle the payload functions
 		case strings.HasPrefix(line, "payload "):
 
-			var ptype string = temp[2]
 			switch  command{
 			case "add":
-				handlePayloadCreation(ptype,l)
+				if len(temp) > 2{
+					ptype = temp[2]
+					handlePayloadCreation(ptype,l)
+				}
 			case "delete":
 				fmt.Println("Remove a payload")
+			case "list":
+				log.Println("Listing payloads")
+				database.GetPayloads()
 			default:
 				fmt.Println("Invalid command")
 			}
@@ -209,7 +216,7 @@ func handleInput(line string ,l *readline.Instance)  {
 			}
 
 		}
-	}
+
 
 	
 }

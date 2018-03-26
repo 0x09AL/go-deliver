@@ -2,7 +2,7 @@ This is a list of things to do.
 
 (x) Make payload delivery function.
 (x) Make payload creation function.
-( ) Make payload list function.
+(x) Make payload list function.
 ( ) Make payload delete function.
 ( ) Get payload types from db and make the suggestions based on that.
 ( ) Get host from db and make suggestions on the payload options.

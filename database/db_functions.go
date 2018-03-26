@@ -17,6 +17,10 @@ import (
 
 	"math/rand"
 	"time"
+	"github.com/olekukonko/tablewriter"
+	"os"
+
+	"strconv"
 )
 
 
@@ -121,14 +125,14 @@ func InsertPayload(payload model.Payload){
 	tx, _ := db.Begin()
 	stmt, err_stmt := tx.Prepare(query)
 	payload.Guid = RandStringRunes(32)
-
+	payload.Type_id = GetTypeid("fix this function")
+	fmt.Println(payload.Guid)
 	if err_stmt != nil {
 		log.Fatal(err_stmt)
 	}
 	_, err := stmt.Exec(payload.Name,payload.Content_type,payload.Host_blacklist,payload.Host_whitelist,payload.Data_file,payload.Data_b64,payload.Type_id,payload.Guid)
 	tx.Commit()
 	if err != nil{
-
 		log.Println("ERROR: Error inserting payload.")
 	}else{
 
@@ -142,9 +146,26 @@ func ShowShit(w http.ResponseWriter,r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w,"What you received is shit")
 }
-func GetPayloads(w http.ResponseWriter,r *http.Request)  {
+func GetPayloads()  {
+	GetPayloadsQuery := "SELECT id, name, guid, content_type,COALESCE(host_blacklist, '') as host_blacklist, COALESCE(host_whitelist, '') as host_whitelist FROM payloads;"
+	rows, err := db.Query(GetPayloadsQuery)
 
+	payload := model.Payload{}
+	if err != nil {
+		panic(err)
+	}
 
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Id", "Name", "Path", "Content Type", "Hosts Whitelist" , "Hosts Blacklist"})
+
+	for rows.Next() {
+		err := rows.Scan(&payload.Id, &payload.Name, &payload.Guid, &payload.Content_type,&payload.Host_whitelist, &payload.Host_blacklist)
+		table.Append([]string{ strconv.Itoa(payload.Id),payload.Name,fmt.Sprintf("/%s/",payload.Guid),payload.Content_type,payload.Host_whitelist,payload.Host_blacklist})
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	table.Render()
 }
 func GetPayload(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
@@ -160,21 +181,15 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 						from payloads 
 						WHERE guid=?`
 
-
-	rows, err := db.Query(GetPayloadQuery, guid)
+	payload := model.Payload{}
+	err := db.QueryRow(GetPayloadQuery, guid).Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id)
 	if err != nil {
 		panic(err)
-	}
-	payload := model.Payload{}
-	rows.Next()
-	err_sql := rows.Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id)
-
-	if err_sql != nil{
-		panic(err_sql)
 	}
 
 	ip , _ , _ := net.SplitHostPort(r.RemoteAddr)
 
+	fmt.Println("") // Prints a new line
 	log.Println(fmt.Sprintf("Delivering payload %s to IP : %s",payload.Name,ip))
 
 	w.Header().Set("Content-Type",payload.Content_type)
@@ -185,10 +200,14 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 			data, err := base64.StdEncoding.DecodeString(payload.Data_b64)
 			if err != nil{
 				log.Println("ERROR : Decoding b64 payload failed.")
+				return
+			}else{
+				w.Write([]byte(data))
 			}
-			w.Write([]byte(data))
+
 		}else{
 			log.Println("ERROR : Payload delivery failed. No content or file specified.")
+			w.Write([]byte(""))
 		}
 	}else{
 		// Write data from file
