@@ -82,7 +82,7 @@ func InsertPayload(payload model.Payload){
 	tx, _ := db.Begin()
 	stmt, err_stmt := tx.Prepare(model.InsertPayloadQuery)
 	payload.Guid = RandStringRunes(32)
-	payload.Type_id = GetTypeid("fix this function")
+	
 	fmt.Println("")
 	if err_stmt != nil {
 		log.Fatal(err_stmt)
