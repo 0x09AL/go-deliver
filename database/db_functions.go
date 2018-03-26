@@ -8,7 +8,6 @@ import (
 	_"github.com/mattn/go-sqlite3"
 	"database/sql"
 	"log"
-	"html/template"
 	"github.com/gorilla/mux"
 	"net"
 	"encoding/base64"
@@ -45,65 +44,23 @@ func CreateTable()  {
 
 
 
-	// This function will create the requrired shits
-	createTableSql := `CREATE TABLE payloads (
-							id	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-							name	TEXT NOT NULL UNIQUE,
-							content_type	TEXT,
-							host_blacklist	TEXT,
-							host_whitelist	TEXT,
-							data_file	TEXT,
-							data_b64	TEXT,
-							type_id	INTEGER NOT NULL,
-							guid	TEXT NOT NULL UNIQUE
-						);
-						`
-
-	createHostSql := `CREATE TABLE hosts (
-							id	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-							type	TEXT NOT NULL,
-							data	TEXT NOT NULL
-						);`
-
-	createTypesSql := `CREATE TABLE types (
-							id	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
-							name	TEXT NOT NULL UNIQUE,
-							type_template	TEXT
-						);`
+	// This function will create the requrired databases
 
 
-
-	fmt.Println(createTableSql)
-	fmt.Println(createHostSql)
-	fmt.Println(createTypesSql)
 }
 
 
-func EditPayload(w http.ResponseWriter,r *http.Request)  {
-	vars := mux.Vars(r)
-	pid := vars["pid"]
-	ReadPayload := "SELECT * FROM payloads WHERE p_id=?"
-	rows, err := db.Query(ReadPayload, pid)
-	if err != nil {
-		panic(err)
-	}
-	payload := model.Payload{}
-	rows.Next()
+func DeletePayload(name string)  {
 
-	err_sql := rows.Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Data_b64)
-
-	if err_sql != nil{
-		panic(err_sql)
+	tx, _ := db.Begin()
+	stmt, _ := tx.Prepare(model.DeletePayloadQuery)
+	_, err := stmt.Exec(name)
+	if err != nil{
+		log.Panic(err)
 	}
-	t,err_tmpl := template.ParseFiles("templates/edit.html")
-	if err_tmpl != nil{
-		panic(err_tmpl)
+	tx.Commit()
+	log.Println(fmt.Sprintf("Success : Payload %s deleted .",name))
 	}
-	t.Execute(w,payload)
-}
-func DeletePayload(w http.ResponseWriter,r *http.Request)  {
-
-}
 
 
 func RandStringRunes(n int) string {
@@ -121,12 +78,12 @@ func GetTypeid(ptype string) int{
 
 func InsertPayload(payload model.Payload){
 	randomInit()
-	query := "INSERT INTO payloads VALUES (NULL,?,?,?,?,?,?,?,?);"
+
 	tx, _ := db.Begin()
-	stmt, err_stmt := tx.Prepare(query)
+	stmt, err_stmt := tx.Prepare(model.InsertPayloadQuery)
 	payload.Guid = RandStringRunes(32)
 	payload.Type_id = GetTypeid("fix this function")
-	fmt.Println(payload.Guid)
+	fmt.Println("")
 	if err_stmt != nil {
 		log.Fatal(err_stmt)
 	}
@@ -147,8 +104,8 @@ func ShowShit(w http.ResponseWriter,r *http.Request)  {
 	fmt.Fprint(w,"What you received is shit")
 }
 func GetPayloads()  {
-	GetPayloadsQuery := "SELECT id, name, guid, content_type,COALESCE(host_blacklist, '') as host_blacklist, COALESCE(host_whitelist, '') as host_whitelist FROM payloads;"
-	rows, err := db.Query(GetPayloadsQuery)
+
+	rows, err := db.Query(model.GetPayloadsQuery)
 
 	payload := model.Payload{}
 	if err != nil {
@@ -170,19 +127,10 @@ func GetPayloads()  {
 func GetPayload(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
 	guid := vars["guid"]
-	GetPayloadQuery := `SELECT id,
-						name,
-						content_type,
-						COALESCE(host_blacklist, '') as host_blacklist, 
-						COALESCE(host_whitelist, '') as host_whitelist,
-						COALESCE(data_file, '') as data_file, 
-						COALESCE(data_b64, '') as data_b64 ,
-						type_id 
-						from payloads 
-						WHERE guid=?`
+
 
 	payload := model.Payload{}
-	err := db.QueryRow(GetPayloadQuery, guid).Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id)
+	err := db.QueryRow(model.GetPayloadQuery, guid).Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id)
 	if err != nil {
 		panic(err)
 	}
@@ -220,40 +168,4 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 	}
 
 
-}
-
-
-func CreatePayloadGet(w http.ResponseWriter,r *http.Request)  {
-	w.WriteHeader(http.StatusOK)
-	t, err_tmpl := template.ParseFiles("templates/create.html")
-	if err_tmpl != nil{
-		panic(err_tmpl)
-	}
-	t.Execute(w,nil)
-}
-
-
-
-func CreatePayload(w http.ResponseWriter,r *http.Request)  {
-
-	tx, _ := db.Begin()
-	stmt, err_stmt := tx.Prepare("INSERT INTO payloads VALUES (NULL,?,?,?);")
-	if err_stmt != nil {
-		log.Fatal(err_stmt)
-	}
-	_, err := stmt.Exec(r.FormValue("p_name"),r.FormValue("p_ct"),r.FormValue("p_content"))
-	tx.Commit()
-	if err != nil {
-		log.Println("Payload Insertion Failed")
-		w.WriteHeader(http.StatusBadRequest)
-	}else{
-		http.Redirect(w,r,"/create.html",http.StatusSeeOther)
-		log.Println("Payload created.")
-
-	}
-
-}
-
-func ListPayloads(){
-	//
 }

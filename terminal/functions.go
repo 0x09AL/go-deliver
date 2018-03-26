@@ -196,7 +196,10 @@ func handleInput(line string ,l *readline.Instance)  {
 					handlePayloadCreation(ptype,l)
 				}
 			case "delete":
-				fmt.Println("Remove a payload")
+				if len(temp) > 2{
+					name := temp[2]
+					database.DeletePayload(name)
+				}
 			case "list":
 				log.Println("Listing payloads")
 				database.GetPayloads()
