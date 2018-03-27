@@ -27,7 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to parse gcfg data: %s", err)
 	}
-	log.Println("Starting server")
+	log.Println(fmt.Sprintf("Starting http server on port : %d",Configuration.Http.Port))
 
 	// Starts the server
 	go http.ListenAndServe(fmt.Sprintf(":%d",Configuration.Http.Port),listener)
