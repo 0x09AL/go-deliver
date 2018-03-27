@@ -8,6 +8,7 @@ This is a list of things to do.
 ( ) Get host from db and make suggestions on the payload options.
 (x) Make the host add/delete function.
 ( ) Make the logic of hosts on payload delivery function.
+( ) Specify different 403 and 404 Error pages (From config).
 
 Other versions
 ( ) Add different listeners like smb,https etc.

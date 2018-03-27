@@ -59,3 +59,13 @@ func DeleteHost(name string)  {
 	tx.Commit()
 	log.Println(fmt.Sprintf("Success : Host %s deleted .",name))
 }
+
+func GetData(name string) (string, string){
+
+	host := model.Host{}
+	err := db.QueryRow(model.GetHostDataQuery, name).Scan(&host.Htype,&host.Data)
+	if err != nil {
+		panic(err)
+	}
+	return host.Htype, host.Data
+}

@@ -52,3 +52,5 @@ var CreateHostQuery = "INSERT INTO hosts VALUES(NULL,?,?,?)"
 var GetHostsQuery = "SELECT * from hosts;"
 
 var DeleteHostQuery = "DELETE FROM hosts where name == ?;"
+
+var GetHostDataQuery = "SELECT type, data FROM hosts WHERE name == ?;"

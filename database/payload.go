@@ -118,7 +118,7 @@ func GetPayloads()  {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Id", "Name", "Path", "Content Type", "Hosts Whitelist" , "Hosts Blacklist"})
+	table.SetHeader([]string{"Id", "Name", "Path", "Content Type", "Hosts Blacklist" , "Hosts Whitelist"})
 
 	for rows.Next() {
 		err := rows.Scan(&payload.Id, &payload.Name, &payload.Guid, &payload.Content_type,&payload.Host_whitelist, &payload.Host_blacklist)
@@ -134,7 +134,8 @@ func GetPayloads()  {
 func GetPayload(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
 	guid := vars["guid"]
-
+	var response []byte
+	allow := false
 
 	payload := model.Payload{}
 	err := db.QueryRow(model.GetPayloadQuery, guid).Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id)
@@ -144,11 +145,7 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 
 	ip , _ , _ := net.SplitHostPort(r.RemoteAddr)
 
-	fmt.Println("") // Prints a new line
-	log.Println(fmt.Sprintf("Delivering payload %s to IP : %s",payload.Name,ip))
 
-	w.Header().Set("Content-Type",payload.Content_type)
-	w.WriteHeader(http.StatusOK)
 
 	if payload.Data_file == ""{
 		if payload.Data_b64 != ""{
@@ -157,22 +154,76 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 				log.Println("ERROR : Decoding b64 payload failed.")
 				return
 			}else{
-				w.Write([]byte(data))
+				response = data
 			}
 
 		}else{
 			log.Println("ERROR : Payload delivery failed. No content or file specified.")
-			w.Write([]byte(""))
+			response = []byte("")
 		}
 	}else{
 		// Write data from file
 		data, err := ioutil.ReadFile(payload.Data_file)
 		if err != nil{
 			log.Println(fmt.Sprintf("ERROR: Payload file %s not found.", payload.Data_file))
-			return
+			response = []byte("")
 		}
-		w.Write(data)
+		response = data
 	}
+
+
+	if payload.Host_whitelist != ""{
+		htype , data := GetData(payload.Host_whitelist)
+		switch htype{
+		case "ip":
+			//Check if remote ip is the same
+			if data == ip{
+				allow = true
+			}
+
+		case "subnet":
+			// Check if ip is in subnet
+			_ , ipNet , _ := net.ParseCIDR(data)
+			if ipNet.Contains(net.ParseIP(ip)){
+				allow = true
+			}
+
+		}
+
+	}else if payload.Host_blacklist != ""{
+		htype , data := GetData(payload.Host_blacklist)
+		switch htype{
+			case "ip":
+				//Check if remote ip is the same
+				if data == ip{
+					allow = false
+				}else {
+					allow = true
+				}
+			case "subnet":
+				// Check if ip is in subnet
+				_ , ipNet , _ := net.ParseCIDR(data)
+				if ipNet.Contains(net.ParseIP(ip)){
+					allow = false
+				}else{
+					allow = true
+					}
+		}
+	}
+
+	if allow == true{
+		fmt.Println("") // Prints a new line
+		log.Println(fmt.Sprintf("Delivering payload %s to IP : %s",payload.Name,ip))
+
+		w.Header().Set("Content-Type",payload.Content_type)
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
+	}else{
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("")) // Will write the 404 template later.
+		log.Println(fmt.Sprintf("Denided access to IP: %s for %s payload.",ip,payload.Name))
+	}
+
 
 }
 
