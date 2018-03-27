@@ -83,3 +83,24 @@ Note : ``` If no whitelist or blacklist is specified the payload will get delive
 
 Suggestions ???
 
+## Screenshots
+### Payload Creation
+
+![alt text](https://raw.githubusercontent.com/0x09AL/go-deliver/master/screenshot/payload_creation.png "Payload Creation")
+
+### Payload List
+
+![alt text](https://raw.githubusercontent.com/0x09AL/go-deliver/master/screenshot/payload_list.png "Payload List")
+
+### Payload Deliver
+
+![alt text](https://raw.githubusercontent.com/0x09AL/go-deliver/master/screenshot/payload_deliver.png "Payload Deliver")
+
+### Host Creation
+
+![alt text](https://raw.githubusercontent.com/0x09AL/go-deliver/master/screenshot/host_creation.png "Payload List")
+
+### Payload with Black List
+
+![alt text](https://raw.githubusercontent.com/0x09AL/go-deliver/master/screenshot/blacklist_example.png "Black List Example")
+
