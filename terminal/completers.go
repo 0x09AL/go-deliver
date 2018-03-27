@@ -20,8 +20,8 @@ var MainCompleter = readline.NewPrefixCompleter(
 	),
 	readline.PcItem("host",
 		readline.PcItem("add"),
-		readline.PcItem("delete"),
 		readline.PcItem("list"),
+		readline.PcItem("delete"),
 	),
 	//	readline.PcItem("listeners") To be implemented later .
 )

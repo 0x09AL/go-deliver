@@ -49,3 +49,5 @@ var GetPayloadTypeId = "SELECT type_id , COALESCE(content_type, '') as content_t
 var CreateHostQuery = "INSERT INTO hosts VALUES(NULL,?,?,?,?)"
 
 var GetHostsQuery = "SELECT * from hosts;"
+
+var DeleteHostQuery = "DELETE FROM hosts where name == ?;"

@@ -49,6 +49,13 @@ func ListHosts()  {
 
 }
 
-func DeleteHost()  {
-
+func DeleteHost(name string)  {
+	tx, _ := db.Begin()
+	stmt, _ := tx.Prepare(model.DeleteHostQuery)
+	_, err := stmt.Exec(name)
+	if err != nil{
+		log.Panic(err)
+	}
+	tx.Commit()
+	log.Println(fmt.Sprintf("Success : Host %s deleted .",name))
 }

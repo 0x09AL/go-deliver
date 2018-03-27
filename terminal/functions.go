@@ -68,7 +68,6 @@ func handleHostCreation(name string, l *readline.Instance){
 			if len(temp) == 2{
 				key := temp[1]
 				switch key{
-
 				case "name":
 					host.Name = ""
 				case "htype":
@@ -228,7 +227,10 @@ func handleInput(line string ,l *readline.Instance)  {
 			log.Println("Listing hosts")
 			database.ListHosts()
 		case "delete":
-			fmt.Println("Remove a host")
+			if len(temp) > 2{
+				name := temp[2]
+				database.DeleteHost(name)
+			}
 		default:
 			fmt.Println("Invalid command")
 		}
