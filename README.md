@@ -2,6 +2,9 @@
 
 Go-deliver is a payload delivery tool coded in Go. This is the first version and other features will be added in the future.
 
+## Precompiled Releases
+https://github.com/0x09AL/go-deliver/releases
+
 ## Installation
 To use go-deliver without installing Go and the required dependencies you can download the precompiled binaries. 
 
