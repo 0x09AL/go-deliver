@@ -34,13 +34,6 @@ func randomInit() {
 
 func CreateTable()  {
 
-	// Insert payload query
-	//insert into payloads values (NULL,'test123','wtf',NULL,NULL,'/tmp/shit',NULL,1);
-	// Payload types query
-	//insert into payload_types values (NULL,'javascript',NULL)
-
-
-
 	// This function will create the requrired databases
 
 
@@ -103,9 +96,9 @@ func InsertPayload(payload model.Payload){
 }
 
 
-func ShowShit(w http.ResponseWriter,r *http.Request)  {
+func ShowIndex(w http.ResponseWriter,r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w,"What you received is shit")
+	w.Write([]byte("It works !!!"))
 }
 
 func GetPayloads()  {

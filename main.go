@@ -18,7 +18,7 @@ func main() {
 	Configuration := model.CFG{}
 	// Setup Routes
 	listener := mux.NewRouter()
-	listener.HandleFunc("/",database.ShowShit).Methods("GET")
+	listener.HandleFunc("/",database.ShowIndex).Methods("GET")
 	listener.HandleFunc("/{guid}/",database.GetPayload).Methods("GET")
 
 
