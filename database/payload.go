@@ -6,7 +6,7 @@ import (
 	"fmt"
 	_ "database/sql"
 	_"github.com/mattn/go-sqlite3"
-	"database/sql"
+	
 	"log"
 	"github.com/gorilla/mux"
 	"net"
@@ -24,7 +24,7 @@ import (
 
 
 
-var db, _ = sql.Open("sqlite3", "test_db.db")
+
 var letters = []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 
@@ -70,9 +70,16 @@ func RandStringRunes(n int) string {
 	}
 	return string(b)
 }
-func GetTypeid(ptype string) int{
-	// To be Implemented
-	return 1;
+func GetTypeid(ptype string) (int , string) {
+
+	payloadType := model.PayloadType{}
+	err := db.QueryRow(model.GetPayloadTypeId, ptype).Scan(&payloadType.Type_id,&payloadType.Content_type)
+	if err != nil {
+
+		fmt.Println(fmt.Sprintf("ERROR: Payload type %s doesn't exist.",ptype))
+		return 0,""
+	}
+	return payloadType.Type_id, payloadType.Content_type;
 }
 
 
@@ -82,7 +89,7 @@ func InsertPayload(payload model.Payload){
 	tx, _ := db.Begin()
 	stmt, err_stmt := tx.Prepare(model.InsertPayloadQuery)
 	payload.Guid = RandStringRunes(32)
-	
+
 	fmt.Println("")
 	if err_stmt != nil {
 		log.Fatal(err_stmt)
@@ -124,6 +131,8 @@ func GetPayloads()  {
 	}
 	table.Render()
 }
+
+
 func GetPayload(w http.ResponseWriter,r *http.Request){
 	vars := mux.Vars(r)
 	guid := vars["guid"]
@@ -167,5 +176,27 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 		w.Write(data)
 	}
 
+}
 
+func GetPayloadTypes() []model.PayloadType{
+
+	payloadTypes := []model.PayloadType{}
+
+	rows, err := db.Query(model.GetPayloadTypesQuery)
+
+	payloadType := model.PayloadType{}
+
+	if err != nil {
+		panic(err)
+	}
+
+	for rows.Next() {
+		err := rows.Scan(&payloadType.Type_name,&payloadType.Content_type)
+		payloadTypes = append(payloadTypes,payloadType)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return payloadTypes
 }

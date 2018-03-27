@@ -23,6 +23,7 @@ var CreateTypesSql = `CREATE TABLE types (
 							id	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 							name	TEXT NOT NULL UNIQUE,
 							type_template	TEXT
+							content_type TEXT
 						);`
 var DeletePayloadQuery = "DELETE FROM payloads where name == ?;"
 
@@ -40,3 +41,7 @@ var GetPayloadQuery = `SELECT id,
 						type_id 
 						from payloads 
 						WHERE guid=?`
+
+var GetPayloadTypesQuery = "SELECT type_name , content_type FROM payload_types;"
+
+var GetPayloadTypeId = "SELECT type_id , COALESCE(content_type, '') as content_type  FROM payload_types WHERE type_name == ?;";

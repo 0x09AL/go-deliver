@@ -22,3 +22,24 @@ type Host struct {
 	data string
 }
 
+
+type PayloadType struct {
+	Type_id int
+	Type_name string
+	Type_template string
+	Content_type string
+}
+
+type CFG struct {
+	Http struct {
+		Port int
+		Template403 string
+		Template404 string
+	}
+	Https struct {
+		Port int
+		Template403 string
+		Template404 string
+	}
+
+}

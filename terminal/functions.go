@@ -26,6 +26,9 @@ var MainCompleter = readline.NewPrefixCompleter(
 			readline.PcItem("regsrv32"),
 			readline.PcItem("powershell"),
 			readline.PcItem("javascript"),
+			readline.PcItem("html"),
+			readline.PcItem("text"),
+			readline.PcItem("exe"),
 		),
 		readline.PcItem("delete"),
 		readline.PcItem("list"),
@@ -45,7 +48,7 @@ var PayloadCompleter = readline.NewPrefixCompleter(
 		readline.PcItem("data_b64"),
 		readline.PcItem("ptype"),
 		//readline.PcItem("listener"), // This is will be implemented later.
-		),
+	),
 	readline.PcItem("unset",
 		readline.PcItem("content_type"),
 		readline.PcItem("host_blacklist"),
@@ -70,7 +73,7 @@ var HostCompleter = readline.NewPrefixCompleter(
 			readline.PcItem("subnet"),
 		),
 		readline.PcItem("data"),
-		),
+	),
 )
 
 
@@ -81,7 +84,7 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 
 	payload := model.Payload{}
 	payload.Ptype = ptype
-	payload.Type_id = database.GetTypeid(ptype)
+	payload.Type_id,payload.Content_type = database.GetTypeid(ptype)
 
 
 	l.Config.AutoComplete = PayloadCompleter
@@ -186,42 +189,42 @@ func handleInput(line string ,l *readline.Instance)  {
 
 	switch {
 
-		// Handle the payload functions
-		case strings.HasPrefix(line, "payload "):
+	// Handle the payload functions
+	case strings.HasPrefix(line, "payload "):
 
-			switch  command{
-			case "add":
-				if len(temp) > 2{
-					ptype = temp[2]
-					handlePayloadCreation(ptype,l)
-				}
-			case "delete":
-				if len(temp) > 2{
-					name := temp[2]
-					database.DeletePayload(name)
-				}
-			case "list":
-				log.Println("Listing payloads")
-				database.GetPayloads()
-			default:
-				fmt.Println("Invalid command")
+		switch  command{
+		case "add":
+			if len(temp) > 2{
+				ptype = temp[2]
+				handlePayloadCreation(ptype,l)
 			}
-
-		// Handle the Hosts functions
-		case strings.HasPrefix(line, "host "):
-			switch command {
-			case "add":
-				fmt.Println("Add a host")
-			case "delete":
-				fmt.Println("Remove a host")
-			default:
-				fmt.Println("Invalid command")
+		case "delete":
+			if len(temp) > 2{
+				name := temp[2]
+				database.DeletePayload(name)
 			}
-
+		case "list":
+			log.Println("Listing payloads")
+			database.GetPayloads()
+		default:
+			fmt.Println("Invalid command")
 		}
 
+		// Handle the Hosts functions
+	case strings.HasPrefix(line, "host "):
+		switch command {
+		case "add":
+			fmt.Println("Add a host")
+		case "delete":
+			fmt.Println("Remove a host")
+		default:
+			fmt.Println("Invalid command")
+		}
 
-	
+	}
+
+
+
 }
 
 func StartTerminal()  {
@@ -259,6 +262,5 @@ func StartTerminal()  {
 
 	}
 }
-
 
 
