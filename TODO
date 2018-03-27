@@ -7,6 +7,7 @@ This is a list of things to do.
 ( ) Get payload types from db and make the suggestions based on that.
 ( ) Get host from db and make suggestions on the payload options.
 (x) Make the host add/delete function.
+( ) Make the logic of hosts on payload delivery function.
 
 Other versions
 ( ) Add different listeners like smb,https etc.

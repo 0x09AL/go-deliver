@@ -6,7 +6,7 @@ import (
 	"log"
 	"github.com/olekukonko/tablewriter"
 	"os"
-	"strconv"
+
 )
 
 func CreateHost(host model.Host)  {
@@ -36,11 +36,11 @@ func ListHosts()  {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Id", "Name", "Host Type", "Restriction Type"})
+	table.SetHeader([]string{"Name", "Host Type", "Restriction Type"})
 
 	for rows.Next() {
 		err := rows.Scan(&host.Id, &host.Name, &host.Htype , &host.Data, &host.Restriction_type)
-		table.Append([]string{ strconv.Itoa(host.Id),host.Name,host.Data,host.Restriction_type})
+		table.Append([]string{ host.Name,host.Data,host.Restriction_type})
 		if err != nil {
 			log.Fatal(err)
 		}

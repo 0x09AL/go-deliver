@@ -16,8 +16,9 @@ var CreateTableSql = `CREATE TABLE payloads (
 var CreateHostSql = `CREATE TABLE hosts (
 							id	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
 							type	TEXT NOT NULL,
-							data	TEXT NOT NULL
-						);`
+							data	TEXT NOT NULL,
+							restriction_type TEXT NOT NULL,
+							);`
 
 var CreateTypesSql = `CREATE TABLE types (
 							id	INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
