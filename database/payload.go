@@ -6,19 +6,16 @@ import (
 	"fmt"
 	_ "database/sql"
 	_"github.com/mattn/go-sqlite3"
-	
 	"log"
 	"github.com/gorilla/mux"
 	"net"
 	"encoding/base64"
 	"io/ioutil"
 	"go-deliver/model"
-
 	"math/rand"
 	"time"
 	"github.com/olekukonko/tablewriter"
 	"os"
-
 	"strconv"
 )
 
@@ -110,6 +107,7 @@ func ShowShit(w http.ResponseWriter,r *http.Request)  {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w,"What you received is shit")
 }
+
 func GetPayloads()  {
 
 	rows, err := db.Query(model.GetPayloadsQuery)

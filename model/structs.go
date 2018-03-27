@@ -17,9 +17,11 @@ type Payload struct {
 }
 
 type Host struct {
-	name string
-	htype string
-	data string
+	Id int
+	Name string
+	Htype string
+	Data string
+	Restriction_type string
 }
 
 

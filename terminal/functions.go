@@ -16,69 +16,75 @@ import(
 var context string = "main"
 var prompt string = "go-deliver (\033[0;32m%s\033[0;0m)\033[31m >> \033[0;0m"
 
+func handleHostCreation(name string, l *readline.Instance){
+	host := model.Host{}
+	host.Name = name
+	l.Config.AutoComplete = HostCompleter
+	l.SetPrompt(fmt.Sprintf(prompt,"host-options"))
+	for {line, err := l.Readline()
+		if err == readline.ErrInterrupt {
+			if len(line) == 0 {
+				break
+			} else {
+				continue
+			}
+		} else if err == io.EOF {
+			break
+		}
+
+		line = strings.TrimSpace(line)
+
+		temp := strings.Split(line," ")
+		command := temp[0]
+		switch command{
+		case "back":
+			backMain(l)
+			return
+		case "options":
+			// To be fixed
+			data, err := json.MarshalIndent(host,"", "  ")
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("%s\n", data)
+
+		case "set":
+			if len(temp) == 3{
+				key := temp[1]
+				value := temp[2]
+				switch key{
+				case "name":
+					host.Name = value
+				case "htype":
+					host.Htype = value
+				case "data":
+					host.Data = value
+				case "restriction_type":
+					host.Restriction_type = value
+				}
+
+			}
+		case "unset":
+			if len(temp) == 2{
+				key := temp[1]
+				switch key{
+
+				case "name":
+					host.Name = ""
+				case "htype":
+					host.Htype = ""
+				case "data":
+					host.Data = ""
+				}
+			}
+		case "create":
+			database.CreateHost(host)
+		default:
 
 
-var MainCompleter = readline.NewPrefixCompleter(
-	readline.PcItem("payload",
-		readline.PcItem("add",
-			// Vlerat ketu do merren nga databaza ne te ardhmen.
-			readline.PcItem("mshta"),
-			readline.PcItem("regsrv32"),
-			readline.PcItem("powershell"),
-			readline.PcItem("javascript"),
-			readline.PcItem("html"),
-			readline.PcItem("text"),
-			readline.PcItem("exe"),
-		),
-		readline.PcItem("delete"),
-		readline.PcItem("list"),
-
-	),
-	readline.PcItem("host"),
-	//	readline.PcItem("listeners") To be implemented later .
-)
-
-var PayloadCompleter = readline.NewPrefixCompleter(
-	readline.PcItem("set",
-		readline.PcItem("name"),
-		readline.PcItem("content_type"),
-		readline.PcItem("host_blacklist"),
-		readline.PcItem("host_whitelist"),
-		readline.PcItem("data_file"),
-		readline.PcItem("data_b64"),
-		readline.PcItem("ptype"),
-		//readline.PcItem("listener"), // This is will be implemented later.
-	),
-	readline.PcItem("unset",
-		readline.PcItem("content_type"),
-		readline.PcItem("host_blacklist"),
-		readline.PcItem("host_whitelist"),
-		readline.PcItem("data_file"),
-		readline.PcItem("data_b64"),
-		readline.PcItem("type"),
-		//readline.PcItem("listener"), // This is will be implemented later.
-	),
-	readline.PcItem("options"),
-	readline.PcItem("create"),
-	readline.PcItem("back"),
-
-)
-
-
-var HostCompleter = readline.NewPrefixCompleter(
-	readline.PcItem("set",
-		readline.PcItem("name"),
-		readline.PcItem("type",
-			readline.PcItem("ip"),
-			readline.PcItem("subnet"),
-		),
-		readline.PcItem("data"),
-	),
-)
-
-
-
-
+		}
+	}
+}
 
 func handlePayloadCreation(ptype string, l *readline.Instance)  {
 
@@ -214,7 +220,13 @@ func handleInput(line string ,l *readline.Instance)  {
 	case strings.HasPrefix(line, "host "):
 		switch command {
 		case "add":
-			fmt.Println("Add a host")
+			if len(temp) > 2{
+				name := temp[2]
+				handleHostCreation(name,l)
+			}
+		case "list":
+			log.Println("Listing hosts")
+			database.ListHosts()
 		case "delete":
 			fmt.Println("Remove a host")
 		default:
