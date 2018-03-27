@@ -1,4 +1,4 @@
-This is a list of things to do.
+Version 0.1 
 
 (x) Make payload delivery function.
 (x) Make payload creation function.
@@ -7,7 +7,7 @@ This is a list of things to do.
 ( ) Get payload types from db and make the suggestions based on that.
 ( ) Get host from db and make suggestions on the payload options.
 (x) Make the host add/delete function.
-( ) Make the logic of hosts on payload delivery function.
+(x) Make the logic of hosts on payload delivery function.
 ( ) Specify different 403 and 404 Error pages (From config).
 
 Other versions
