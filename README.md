@@ -1,6 +1,5 @@
 # go-deliver
 
-## Description
 Go-deliver is a payload delivery tool coded in Go. This is the first version and other features will be added in the future.
 
 ## Installation
