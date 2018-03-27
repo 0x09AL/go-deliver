@@ -209,6 +209,9 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 					allow = true
 					}
 		}
+	}else {
+		// If no whitelist or blacklist is defined the payload will get delivered.
+		allow= true
 	}
 
 	if allow == true{
@@ -221,7 +224,7 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 	}else{
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("")) // Will write the 404 template later.
-		log.Println(fmt.Sprintf("Denided access to IP: %s for %s payload.",ip,payload.Name))
+		log.Println(fmt.Sprintf("Denied access to IP: %s for %s payload.",ip,payload.Name))
 	}
 
 
