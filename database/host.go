@@ -16,7 +16,7 @@ func CreateHost(host model.Host)  {
 	if err_stmt != nil {
 		log.Fatal(err_stmt)
 	}
-	_, err := stmt.Exec(host.Name,host.Htype,host.Data,host.Restriction_type)
+	_, err := stmt.Exec(host.Name,host.Htype,host.Data)
 	tx.Commit()
 	if err != nil{
 		log.Println("ERROR: Error inserting host.")
@@ -36,11 +36,11 @@ func ListHosts()  {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Name", "Host Type", "Restriction Type"})
+	table.SetHeader([]string{"Name", "Host Type", "Data"})
 
 	for rows.Next() {
-		err := rows.Scan(&host.Id, &host.Name, &host.Htype , &host.Data, &host.Restriction_type)
-		table.Append([]string{ host.Name,host.Data,host.Restriction_type})
+		err := rows.Scan(&host.Id, &host.Name, &host.Htype , &host.Data)
+		table.Append([]string{ host.Name,host.Htype,host.Data})
 		if err != nil {
 			log.Fatal(err)
 		}

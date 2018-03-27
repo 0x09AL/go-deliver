@@ -47,7 +47,7 @@ var GetPayloadTypesQuery = "SELECT type_name , content_type FROM payload_types;"
 
 var GetPayloadTypeId = "SELECT type_id , COALESCE(content_type, '') as content_type  FROM payload_types WHERE type_name == ?;";
 
-var CreateHostQuery = "INSERT INTO hosts VALUES(NULL,?,?,?,?)"
+var CreateHostQuery = "INSERT INTO hosts VALUES(NULL,?,?,?)"
 
 var GetHostsQuery = "SELECT * from hosts;"
 

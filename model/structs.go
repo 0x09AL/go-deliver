@@ -21,7 +21,7 @@ type Host struct {
 	Name string
 	Htype string
 	Data string
-	Restriction_type string
+
 }
 
 

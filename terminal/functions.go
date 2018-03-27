@@ -59,8 +59,6 @@ func handleHostCreation(name string, l *readline.Instance){
 					host.Htype = value
 				case "data":
 					host.Data = value
-				case "restriction_type":
-					host.Restriction_type = value
 				}
 
 			}
