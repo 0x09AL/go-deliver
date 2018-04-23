@@ -29,17 +29,18 @@ Sample configuration :
 
 ```
 [http]
-port = 8000
-template403 = template/403.html
-template404 = template/403.html
+enable = true
+port = 8888
+template404 = templates/404.html
 
 [https]
+enable = false
 port = 8443
-template403 = template/403.html
-template404 = template/403.html
+template404 = templates/404.html
+publickey = certs/server.pem
+privatekey = certs/server.key
+
 ```
-The only configuration that can be changed here is the ```port``` under http. The other options are for features that will be added later.
-There is a lot of code that has been created for future versions so you can ignore them.
 
 ## Usage
 The main logic behind go-deliver is to deliver different type of payloads to specific IP/Subnet address or block access for specific IP/Subnet.
