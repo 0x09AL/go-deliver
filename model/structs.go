@@ -34,14 +34,16 @@ type PayloadType struct {
 
 type CFG struct {
 	Http struct {
+		Enable string
 		Port int
-		Template403 string
 		Template404 string
 	}
 	Https struct {
+		Enable string
 		Port int
-		Template403 string
 		Template404 string
+		Publickey string
+		Privatekey string
 	}
 
 }

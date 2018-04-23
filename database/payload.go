@@ -133,7 +133,9 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 	payload := model.Payload{}
 	err := db.QueryRow(model.GetPayloadQuery, guid).Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id)
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 
 	ip , _ , _ := net.SplitHostPort(r.RemoteAddr)
@@ -215,8 +217,8 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	}else{
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("")) // Will write the 404 template later.
+		w.WriteHeader(http.StatusForbidden)
+		//w.Write([]byte("")) // Will write the 403 template later.
 		log.Println(fmt.Sprintf("Denied access to IP: %s for %s payload.",ip,payload.Name))
 	}
 
