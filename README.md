@@ -22,7 +22,7 @@ If you want to compile from source:
 * http://gopkg.in/gcfg.v1
 
 ## Configuration
-Currently go-deliver supports only http server for payload delivery. More server types will be added later.
+Currently go-deliver supports only http and https server for payload delivery. More server types will be added later.
 To change the port of the http server you can modify the ```config.conf```.
 
 Sample configuration :
