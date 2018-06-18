@@ -1,27 +1,27 @@
 package terminal
 
-import "github.com/chzyer/readline"
+import (
+	"github.com/chzyer/readline"
+	"go-deliver/database"
+)
 
 var MainCompleter = readline.NewPrefixCompleter(
 	readline.PcItem("payload",
 		readline.PcItem("add",
-			// Vlerat ketu do merren nga databaza ne te ardhmen.
-			readline.PcItem("mshta"),
-			readline.PcItem("regsrv32"),
-			readline.PcItem("powershell"),
-			readline.PcItem("javascript"),
-			readline.PcItem("html"),
-			readline.PcItem("text"),
-			readline.PcItem("exe"),
+			readline.PcItemDynamic(database.GetPayloadTypeCompleter(),
+				),
 		),
-		readline.PcItem("delete"),
+		readline.PcItem("delete",
+			readline.PcItemDynamic(database.GetPayloadDeleteCompleter()),
+		),
 		readline.PcItem("list"),
 
 	),
 	readline.PcItem("host",
 		readline.PcItem("add"),
 		readline.PcItem("list"),
-		readline.PcItem("delete"),
+		readline.PcItem("delete",
+			readline.PcItemDynamic(database.GetHostNameCompleter()),),
 	),
 	//	readline.PcItem("listeners") To be implemented later .
 )
@@ -30,11 +30,16 @@ var PayloadCompleter = readline.NewPrefixCompleter(
 	readline.PcItem("set",
 		readline.PcItem("name"),
 		readline.PcItem("content_type"),
-		readline.PcItem("host_blacklist"),
-		readline.PcItem("host_whitelist"),
+		readline.PcItem("host_blacklist",
+			readline.PcItemDynamic(database.GetHostNameCompleter()),
+				),
+		readline.PcItem("host_whitelist",
+			readline.PcItemDynamic(database.GetHostNameCompleter()),
+				),
 		readline.PcItem("data_file"),
 		readline.PcItem("data_b64"),
 		readline.PcItem("ptype"),
+		readline.PcItem("filename"),
 		//readline.PcItem("listener"), // This is will be implemented later.
 	),
 	readline.PcItem("unset",

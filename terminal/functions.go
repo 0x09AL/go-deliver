@@ -140,6 +140,8 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 					payload.Data_b64 = value
 				case "ptype":
 					payload.Ptype = value
+				case "filename":
+					payload.Filename = value
 				}
 
 			}
@@ -161,6 +163,8 @@ func handlePayloadCreation(ptype string, l *readline.Instance)  {
 					payload.Data_b64 = ""
 				case "ptype":
 					payload.Ptype = ""
+				case "filename":
+					payload.Filename = ""
 				}
 			}
 		case "create":

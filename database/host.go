@@ -69,3 +69,25 @@ func GetData(name string) (string, string){
 	}
 	return host.Htype, host.Data
 }
+
+
+func GetHostNameCompleter()  func(string) []string{
+
+	return func(line string) []string {
+		var HostNames []string
+		var temp string
+		rows, err := db.Query(model.GetHostNamesCompleterQuery)
+		if err != nil {
+			panic(err)
+		}
+
+		for rows.Next() {
+			err := rows.Scan(&temp)
+			HostNames = append(HostNames,temp)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		return HostNames
+	}
+}

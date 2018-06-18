@@ -16,7 +16,6 @@ import (
 	"time"
 	"github.com/olekukonko/tablewriter"
 	"os"
-	"strconv"
 )
 
 
@@ -72,6 +71,50 @@ func GetTypeid(ptype string) (int , string) {
 	return payloadType.Type_id, payloadType.Content_type;
 }
 
+func GetPayloadDeleteCompleter()  func(string) []string{
+	// This function is used to autocomplete the payload deletion.
+	return func(line string) []string {
+	var PayloadNames []string
+	var temp string
+	rows, err := db.Query(model.GetPayloadNamesQuery)
+	if err != nil {
+		panic(err)
+	}
+
+	for rows.Next() {
+		err := rows.Scan(&temp)
+		PayloadNames = append(PayloadNames,temp)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	return PayloadNames
+	}
+}
+
+
+func GetPayloadTypeCompleter()  func(string) []string{
+	// This function is used to autocomplete the payload deletion.
+	return func(line string) []string {
+		var PayloadTypes []string
+		var temp string
+		rows, err := db.Query(model.GetPayloadTypesCompleterQuery)
+		if err != nil {
+			panic(err)
+		}
+
+		for rows.Next() {
+			err := rows.Scan(&temp)
+			PayloadTypes = append(PayloadTypes,temp)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		return PayloadTypes
+	}
+}
+
+
 
 func InsertPayload(payload model.Payload){
 	randomInit()
@@ -84,7 +127,7 @@ func InsertPayload(payload model.Payload){
 	if err_stmt != nil {
 		log.Fatal(err_stmt)
 	}
-	_, err := stmt.Exec(payload.Name,payload.Content_type,payload.Host_blacklist,payload.Host_whitelist,payload.Data_file,payload.Data_b64,payload.Type_id,payload.Guid)
+	_, err := stmt.Exec(payload.Name,payload.Content_type,payload.Host_blacklist,payload.Host_whitelist,payload.Data_file,payload.Data_b64,payload.Type_id,payload.Guid,payload.Filename)
 	tx.Commit()
 	if err != nil{
 		log.Println("ERROR: Error inserting payload.")
@@ -111,11 +154,11 @@ func GetPayloads()  {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Id", "Name", "Path", "Content Type", "Hosts Blacklist" , "Hosts Whitelist"})
+	table.SetHeader([]string{"Name", "Path", "Content Type", "Hosts Blacklist" , "Hosts Whitelist"})
 
 	for rows.Next() {
 		err := rows.Scan(&payload.Id, &payload.Name, &payload.Guid, &payload.Content_type,&payload.Host_whitelist, &payload.Host_blacklist)
-		table.Append([]string{ strconv.Itoa(payload.Id),payload.Name,fmt.Sprintf("/%s/",payload.Guid),payload.Content_type,payload.Host_whitelist,payload.Host_blacklist})
+		table.Append([]string{payload.Name,fmt.Sprintf("/%s/",payload.Guid),payload.Content_type,payload.Host_whitelist,payload.Host_blacklist})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -131,7 +174,7 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 	allow := false
 
 	payload := model.Payload{}
-	err := db.QueryRow(model.GetPayloadQuery, guid).Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id)
+	err := db.QueryRow(model.GetPayloadQuery, guid).Scan(&payload.Id,&payload.Name,&payload.Content_type,&payload.Host_blacklist,&payload.Host_whitelist,&payload.Data_file,&payload.Data_b64,&payload.Type_id,&payload.Filename)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusNotFound)
@@ -214,6 +257,10 @@ func GetPayload(w http.ResponseWriter,r *http.Request){
 		log.Println(fmt.Sprintf("Delivering payload %s to IP : %s",payload.Name,ip))
 
 		w.Header().Set("Content-Type",payload.Content_type)
+		if(payload.Filename != ""){
+			w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s",payload.Filename))
+		}
+
 		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	}else{

@@ -1,6 +1,5 @@
 .idea
 *.tmp
 *.exe
-*.db
 payloads
 certs

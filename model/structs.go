@@ -12,6 +12,7 @@ type Payload struct {
 	Ptype 		string
 	Type_id		int
 	Guid		string
+	Filename	string
 	//one_liner	string
 
 }
